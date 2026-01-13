@@ -1,0 +1,132 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import { headers } from 'next/headers';
+
+export interface AuthResult {
+  error?: string;
+  success?: boolean;
+}
+
+export async function signInWithEmail(
+  email: string,
+  password: string
+): Promise<AuthResult> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath('/', 'layout');
+  redirect('/feed');
+}
+
+export async function signUpWithEmail(
+  email: string,
+  password: string,
+  username: string
+): Promise<AuthResult> {
+  const supabase = await createClient();
+  const headersList = await headers();
+  const origin = headersList.get('origin');
+
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback`,
+      data: {
+        username,
+      },
+    },
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function signInWithGoogle(): Promise<void> {
+  const supabase = await createClient();
+  const headersList = await headers();
+  const origin = headersList.get('origin');
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${origin}/auth/callback`,
+    },
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (data.url) {
+    redirect(data.url);
+  }
+}
+
+export async function signInWithStrava(): Promise<void> {
+  const supabase = await createClient();
+  const headersList = await headers();
+  const origin = headersList.get('origin');
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'strava' as 'google',
+    options: {
+      redirectTo: `${origin}/auth/callback`,
+      scopes: 'read,activity:read_all',
+    },
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (data.url) {
+    redirect(data.url);
+  }
+}
+
+export async function signOut(): Promise<void> {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  revalidatePath('/', 'layout');
+  redirect('/login');
+}
+
+export async function getCurrentUser() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user;
+}
+
+export async function getCurrentProfile() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  return profile;
+}
