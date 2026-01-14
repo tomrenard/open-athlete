@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { headers } from "next/headers";
 
 export interface AuthResult {
   error?: string;
@@ -15,33 +14,13 @@ export interface OAuthResult {
   error?: string;
 }
 
-async function getBaseUrl(): Promise<string> {
+function getBaseUrl(): string {
   if (process.env.NEXT_PUBLIC_APP_URL) {
     return process.env.NEXT_PUBLIC_APP_URL;
   }
-
-  const headersList = await headers();
-  const origin = headersList.get("origin");
-  if (origin && !origin.includes("localhost")) {
-    return origin;
-  }
-
-  const host = headersList.get("host");
-  if (host && !host.includes("localhost")) {
-    const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-    return `${protocol}://${host}`;
-  }
-
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
   }
-
-  if (process.env.NODE_ENV === "production") {
-    throw new Error(
-      "NEXT_PUBLIC_APP_URL must be set in production environment"
-    );
-  }
-
   return "http://localhost:3000";
 }
 
@@ -70,7 +49,7 @@ export async function signUpWithEmail(
   username: string
 ): Promise<AuthResult> {
   const supabase = await createClient();
-  const baseUrl = await getBaseUrl();
+  const baseUrl = getBaseUrl();
 
   const { error } = await supabase.auth.signUp({
     email,
@@ -92,7 +71,7 @@ export async function signUpWithEmail(
 
 export async function signInWithGoogle(): Promise<OAuthResult> {
   const supabase = await createClient();
-  const baseUrl = await getBaseUrl();
+  const baseUrl = getBaseUrl();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
@@ -114,7 +93,7 @@ export async function signInWithGoogle(): Promise<OAuthResult> {
 
 export async function signInWithStrava(): Promise<OAuthResult> {
   const supabase = await createClient();
-  const baseUrl = await getBaseUrl();
+  const baseUrl = getBaseUrl();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "strava" as "google",
