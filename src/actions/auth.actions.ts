@@ -1,13 +1,18 @@
-'use server';
+"use server";
 
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
-import { headers } from 'next/headers';
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { headers } from "next/headers";
 
 export interface AuthResult {
   error?: string;
   success?: boolean;
+}
+
+export interface OAuthResult {
+  url?: string;
+  error?: string;
 }
 
 export async function signInWithEmail(
@@ -25,8 +30,8 @@ export async function signInWithEmail(
     return { error: error.message };
   }
 
-  revalidatePath('/', 'layout');
-  redirect('/feed');
+  revalidatePath("/", "layout");
+  redirect("/feed");
 }
 
 export async function signUpWithEmail(
@@ -36,7 +41,7 @@ export async function signUpWithEmail(
 ): Promise<AuthResult> {
   const supabase = await createClient();
   const headersList = await headers();
-  const origin = headersList.get('origin');
+  const origin = headersList.get("origin");
 
   const { error } = await supabase.auth.signUp({
     email,
@@ -56,54 +61,58 @@ export async function signUpWithEmail(
   return { success: true };
 }
 
-export async function signInWithGoogle(): Promise<void> {
+export async function signInWithGoogle(): Promise<OAuthResult> {
   const supabase = await createClient();
   const headersList = await headers();
-  const origin = headersList.get('origin');
+  const origin = headersList.get("origin");
 
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
+    provider: "google",
     options: {
       redirectTo: `${origin}/auth/callback`,
     },
   });
 
   if (error) {
-    throw new Error(error.message);
+    return { error: error.message };
   }
 
   if (data.url) {
-    redirect(data.url);
+    return { url: data.url };
   }
+
+  return { error: "No OAuth URL returned" };
 }
 
-export async function signInWithStrava(): Promise<void> {
+export async function signInWithStrava(): Promise<OAuthResult> {
   const supabase = await createClient();
   const headersList = await headers();
-  const origin = headersList.get('origin');
+  const origin = headersList.get("origin");
 
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'strava' as 'google',
+    provider: "strava" as "google",
     options: {
       redirectTo: `${origin}/auth/callback`,
-      scopes: 'read,activity:read_all',
+      scopes: "read,activity:read_all",
     },
   });
 
   if (error) {
-    throw new Error(error.message);
+    return { error: error.message };
   }
 
   if (data.url) {
-    redirect(data.url);
+    return { url: data.url };
   }
+
+  return { error: "No OAuth URL returned" };
 }
 
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  revalidatePath('/', 'layout');
-  redirect('/login');
+  revalidatePath("/", "layout");
+  redirect("/login");
 }
 
 export async function getCurrentUser() {
@@ -123,9 +132,9 @@ export async function getCurrentProfile() {
   if (!user) return null;
 
   const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
     .single();
 
   return profile;

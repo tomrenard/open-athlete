@@ -29,11 +29,13 @@ export default function LoginPage() {
   async function handleGoogleLogin() {
     setIsLoading(true);
     setError(null);
-    try {
-      await signInWithGoogle();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sign in with Google');
+    
+    const result = await signInWithGoogle();
+    if (result.error) {
+      setError(result.error);
       setIsLoading(false);
+    } else if (result.url) {
+      window.location.href = result.url;
     }
   }
 
