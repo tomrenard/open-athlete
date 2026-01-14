@@ -1,14 +1,14 @@
 # OpenAthlete
 
-An open-source, high-performance fitness platform built with Next.js 15, Supabase, and Leaflet.js.
+A free fitness tracking platform with all features included. No subscription, no paywall.
 
 ## Features
 
-- **Activity Tracking**: Upload FIT and GPX files from your sports watch
-- **Social Feed**: Follow athletes and share your workouts
-- **Beautiful Maps**: View your routes on OpenStreetMap with Leaflet.js
-- **Analytics Dashboard**: Track your progress with PRs and contribution graphs
-- **Modern Design**: Glassmorphism UI with responsive mobile-first design
+- **Activity Tracking**: Upload FIT and GPX files from your sports watch (Garmin, Coros, Polar, etc.)
+- **Social Feed**: Follow athletes and share your workouts with your community
+- **Beautiful Maps**: View your routes with interactive map visualization
+- **Full Analytics**: Track your progress with PRs, year-end recaps, and contribution graphs
+- **Modern Design**: Beautiful, responsive mobile-first design
 
 ## Tech Stack
 
@@ -111,17 +111,11 @@ src/
 └── types/              # TypeScript definitions
 ```
 
-## Contributing
+## Support
 
-Contributions are welcome! Please read our contributing guidelines before submitting a PR.
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
+If you have questions or need help, please reach out through our support channels.
 
 ## Acknowledgments
 
-- [Supabase](https://supabase.com) for the backend infrastructure
-- [Shadcn/UI](https://ui.shadcn.com) for the component library
-- [OpenStreetMap](https://www.openstreetmap.org) for map tiles
-- [Leaflet](https://leafletjs.com) for map rendering
+- [Supabase](https://supabase.com) for backend infrastructure
+- [OpenStreetMap](https://www.openstreetmap.org) for map data
