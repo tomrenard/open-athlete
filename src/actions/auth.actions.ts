@@ -15,6 +15,24 @@ export interface OAuthResult {
   error?: string;
 }
 
+async function getBaseUrl(): Promise<string> {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+
+  const headersList = await headers();
+  const origin = headersList.get("origin");
+  if (origin) return origin;
+
+  const host = headersList.get("host");
+  if (host) {
+    const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+    return `${protocol}://${host}`;
+  }
+
+  return "http://localhost:3000";
+}
+
 export async function signInWithEmail(
   email: string,
   password: string
@@ -40,14 +58,13 @@ export async function signUpWithEmail(
   username: string
 ): Promise<AuthResult> {
   const supabase = await createClient();
-  const headersList = await headers();
-  const origin = headersList.get("origin");
+  const baseUrl = await getBaseUrl();
 
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      emailRedirectTo: `${origin}/auth/callback`,
+      emailRedirectTo: `${baseUrl}/auth/callback`,
       data: {
         username,
       },
@@ -63,13 +80,12 @@ export async function signUpWithEmail(
 
 export async function signInWithGoogle(): Promise<OAuthResult> {
   const supabase = await createClient();
-  const headersList = await headers();
-  const origin = headersList.get("origin");
+  const baseUrl = await getBaseUrl();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${origin}/auth/callback`,
+      redirectTo: `${baseUrl}/auth/callback`,
     },
   });
 
@@ -86,13 +102,12 @@ export async function signInWithGoogle(): Promise<OAuthResult> {
 
 export async function signInWithStrava(): Promise<OAuthResult> {
   const supabase = await createClient();
-  const headersList = await headers();
-  const origin = headersList.get("origin");
+  const baseUrl = await getBaseUrl();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "strava" as "google",
     options: {
-      redirectTo: `${origin}/auth/callback`,
+      redirectTo: `${baseUrl}/auth/callback`,
       scopes: "read,activity:read_all",
     },
   });
