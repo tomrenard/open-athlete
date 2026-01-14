@@ -1,7 +1,25 @@
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
-export default function HomePage() {
+interface HomePageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const params = await searchParams;
+  const code = params.code;
+
+  if (code && typeof code === "string") {
+    const queryString = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) {
+        queryString.set(key, Array.isArray(value) ? value[0] : value);
+      }
+    });
+    redirect(`/auth/callback?${queryString.toString()}`);
+  }
+
   return (
     <div className="min-h-screen gradient-slate flex flex-col">
       <header className="container max-w-6xl mx-auto px-4 py-6 flex items-center justify-between">
@@ -25,7 +43,10 @@ export default function HomePage() {
         </div>
         <div className="flex items-center gap-3">
           <Link href="/login">
-            <Button variant="ghost" className="text-white hover:bg-white/10 btn-touch">
+            <Button
+              variant="ghost"
+              className="text-white hover:bg-white/10 btn-touch"
+            >
               Sign in
             </Button>
           </Link>
@@ -44,9 +65,10 @@ export default function HomePage() {
                 <span className="text-gradient block">No Paywall.</span>
               </h1>
               <p className="text-lg text-slate-300 max-w-lg">
-                OpenAthlete is the free fitness platform with all features included.
-                Track runs, rides, and swims with beautiful analytics and a social feed
-                to connect with fellow athletes. No subscription required.
+                OpenAthlete is the free fitness platform with all features
+                included. Track runs, rides, and swims with beautiful analytics
+                and a social feed to connect with fellow athletes. No
+                subscription required.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/signup">
@@ -99,7 +121,9 @@ export default function HomePage() {
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center p-3 rounded-lg bg-white/5">
                       <p className="text-2xl font-bold text-gradient">10.5km</p>
-                      <p className="text-xs text-slate-400 uppercase">Distance</p>
+                      <p className="text-xs text-slate-400 uppercase">
+                        Distance
+                      </p>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-white/5">
                       <p className="text-2xl font-bold text-white">52:30</p>
@@ -135,16 +159,26 @@ export default function HomePage() {
       <footer className="container max-w-6xl mx-auto px-4 py-8 border-t border-white/10">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-slate-400">
-            © {new Date().getFullYear()} OpenAthlete. All features free, forever.
+            © {new Date().getFullYear()} OpenAthlete. All features free,
+            forever.
           </p>
           <div className="flex items-center gap-6">
-            <Link href="/privacy" className="text-sm text-slate-400 hover:text-white transition-colors">
+            <Link
+              href="/privacy"
+              className="text-sm text-slate-400 hover:text-white transition-colors"
+            >
               Privacy
             </Link>
-            <Link href="/terms" className="text-sm text-slate-400 hover:text-white transition-colors">
+            <Link
+              href="/terms"
+              className="text-sm text-slate-400 hover:text-white transition-colors"
+            >
               Terms
             </Link>
-            <Link href="/contact" className="text-sm text-slate-400 hover:text-white transition-colors">
+            <Link
+              href="/contact"
+              className="text-sm text-slate-400 hover:text-white transition-colors"
+            >
               Contact
             </Link>
           </div>

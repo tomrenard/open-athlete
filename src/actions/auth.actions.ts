@@ -22,12 +22,24 @@ async function getBaseUrl(): Promise<string> {
 
   const headersList = await headers();
   const origin = headersList.get("origin");
-  if (origin) return origin;
+  if (origin && !origin.includes("localhost")) {
+    return origin;
+  }
 
   const host = headersList.get("host");
-  if (host) {
+  if (host && !host.includes("localhost")) {
     const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
     return `${protocol}://${host}`;
+  }
+
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "NEXT_PUBLIC_APP_URL must be set in production environment"
+    );
   }
 
   return "http://localhost:3000";
