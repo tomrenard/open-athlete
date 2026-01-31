@@ -1,6 +1,6 @@
-export type ActivityType = 'run' | 'ride' | 'swim';
-export type PrivacyLevel = 'public' | 'followers' | 'private';
-export type ActivitySource = 'upload' | 'strava' | 'manual';
+export type ActivityType = "run" | "ride" | "swim";
+export type PrivacyLevel = "public" | "followers" | "private";
+export type ActivitySource = "upload" | "strava" | "manual";
 
 export interface GpsPoint {
   id: string;
@@ -62,6 +62,7 @@ export interface Activity {
   best1kmSeconds?: number;
   best5kmSeconds?: number;
   best10kmSeconds?: number;
+  relativeEffort?: number;
   source: ActivitySource;
   externalId?: string;
   createdAt: Date;
@@ -93,6 +94,7 @@ export interface ActivityInsert {
   best1kmSeconds?: number;
   best5kmSeconds?: number;
   best10kmSeconds?: number;
+  relativeEffort?: number;
   source?: ActivitySource;
   externalId?: string;
 }
@@ -114,7 +116,7 @@ export interface ActivityStats {
 }
 
 export interface SeasonPR {
-  distance: '1km' | '5km' | '10km';
+  distance: "1km" | "5km" | "10km";
   timeSeconds: number;
   activityId: string;
   activityName: string;

@@ -1,4 +1,4 @@
-import type { ActivityType, PrivacyLevel, ActivitySource } from './activity';
+import type { ActivityType, PrivacyLevel, ActivitySource } from "./activity";
 
 export interface Database {
   public: {
@@ -12,6 +12,8 @@ export interface Database {
           bio: string | null;
           location: string | null;
           strava_athlete_id: number | null;
+          max_heart_rate: number | null;
+          rest_heart_rate: number | null;
           created_at: string;
           updated_at: string;
         };
@@ -23,6 +25,8 @@ export interface Database {
           bio?: string | null;
           location?: string | null;
           strava_athlete_id?: number | null;
+          max_heart_rate?: number | null;
+          rest_heart_rate?: number | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -34,6 +38,8 @@ export interface Database {
           bio?: string | null;
           location?: string | null;
           strava_athlete_id?: number | null;
+          max_heart_rate?: number | null;
+          rest_heart_rate?: number | null;
           updated_at?: string;
         };
       };
@@ -64,6 +70,7 @@ export interface Database {
           best_1km_seconds: number | null;
           best_5km_seconds: number | null;
           best_10km_seconds: number | null;
+          relative_effort: number | null;
           source: ActivitySource;
           external_id: string | null;
           created_at: string;
@@ -95,6 +102,7 @@ export interface Database {
           best_1km_seconds?: number | null;
           best_5km_seconds?: number | null;
           best_10km_seconds?: number | null;
+          relative_effort?: number | null;
           source?: ActivitySource;
           external_id?: string | null;
           created_at?: string;
@@ -125,6 +133,7 @@ export interface Database {
           best_1km_seconds?: number | null;
           best_5km_seconds?: number | null;
           best_10km_seconds?: number | null;
+          relative_effort?: number | null;
           source?: ActivitySource;
           external_id?: string | null;
           updated_at?: string;

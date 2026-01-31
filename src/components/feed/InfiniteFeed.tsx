@@ -1,17 +1,33 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { ActivityCard } from './ActivityCard';
-import { Skeleton } from '@/components/ui/skeleton';
-import { getFeedActivities } from '@/actions/activity.actions';
-import type { ActivityWithAuthor } from '@/types';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { ActivityCard } from "./ActivityCard";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getFeedActivities } from "@/actions/activity.actions";
+import {
+  getKudosCounts,
+  getActivityIdsUserHasKudos,
+} from "@/actions/kudos.actions";
+import { getCommentCounts } from "@/actions/comments.actions";
+import type { ActivityWithAuthor } from "@/types";
+
+export type ActivityWithKudos = ActivityWithAuthor & {
+  kudosCount: number;
+  hasKudos: boolean;
+  commentCount: number;
+};
 
 interface InfiniteFeedProps {
-  initialActivities: ActivityWithAuthor[];
+  initialActivities: ActivityWithKudos[];
+  currentUserId?: string;
 }
 
-export function InfiniteFeed({ initialActivities }: InfiniteFeedProps) {
-  const [activities, setActivities] = useState<ActivityWithAuthor[]>(initialActivities);
+export function InfiniteFeed({
+  initialActivities,
+  currentUserId,
+}: InfiniteFeedProps) {
+  const [activities, setActivities] =
+    useState<ActivityWithKudos[]>(initialActivities);
   const [page, setPage] = useState(2);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -23,16 +39,35 @@ export function InfiniteFeed({ initialActivities }: InfiniteFeedProps) {
 
     setIsLoading(true);
     try {
-      const { activities: newActivities, hasMore: more } = await getFeedActivities(page);
-      setActivities((prev) => [...prev, ...newActivities]);
+      const { activities: newActivities, hasMore: more } =
+        await getFeedActivities(page);
+      const ids = newActivities.map((a) => a.id);
+      const [kudosCounts, hasKudosIds, commentCounts] = await Promise.all([
+        getKudosCounts(ids),
+        currentUserId
+          ? getActivityIdsUserHasKudos(ids, currentUserId)
+          : Promise.resolve(new Set<string>()),
+        getCommentCounts(ids),
+      ]);
+      const withKudos: ActivityWithKudos[] = newActivities.map((a) => ({
+        ...a,
+        kudosCount: kudosCounts[a.id] ?? 0,
+        hasKudos: hasKudosIds.has(a.id),
+        commentCount: commentCounts[a.id] ?? 0,
+      }));
+      setActivities((prev) => {
+        const existingIds = new Set(prev.map((a) => a.id));
+        const toAdd = withKudos.filter((a) => !existingIds.has(a.id));
+        return toAdd.length === 0 ? prev : [...prev, ...toAdd];
+      });
       setHasMore(more);
       setPage((prev) => prev + 1);
     } catch (error) {
-      console.error('Failed to load more activities:', error);
+      console.error("Failed to load more activities:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [page, isLoading, hasMore]);
+  }, [page, isLoading, hasMore, currentUserId]);
 
   useEffect(() => {
     const element = loadMoreRef.current;
@@ -44,7 +79,7 @@ export function InfiniteFeed({ initialActivities }: InfiniteFeedProps) {
           loadMore();
         }
       },
-      { threshold: 0.1, rootMargin: '100px' }
+      { threshold: 0.1, rootMargin: "100px" }
     );
 
     observerRef.current.observe(element);
@@ -76,7 +111,8 @@ export function InfiniteFeed({ initialActivities }: InfiniteFeedProps) {
         </div>
         <h3 className="text-lg font-semibold mb-2">No activities yet</h3>
         <p className="text-muted-foreground">
-          Upload your first activity or follow other athletes to see their workouts.
+          Upload your first activity or follow other athletes to see their
+          workouts.
         </p>
       </div>
     );
@@ -85,7 +121,13 @@ export function InfiniteFeed({ initialActivities }: InfiniteFeedProps) {
   return (
     <div className="space-y-6">
       {activities.map((activity) => (
-        <ActivityCard key={activity.id} activity={activity} />
+        <ActivityCard
+          key={activity.id}
+          activity={activity}
+          kudosCount={activity.kudosCount}
+          hasKudos={activity.hasKudos}
+          commentCount={activity.commentCount}
+        />
       ))}
 
       <div ref={loadMoreRef} className="py-4">

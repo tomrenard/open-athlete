@@ -1,10 +1,11 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { MapThumbnail } from '@/components/maps/MapThumbnail';
+import Link from "next/link";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { KudosButton } from "@/components/activity/KudosButton";
+import { MapThumbnail } from "@/components/maps/MapThumbnail";
 import {
   formatDistance,
   formatDuration,
@@ -12,16 +13,24 @@ import {
   formatTimeAgo,
   formatElevation,
   formatHeartRate,
-} from '@/lib/utils/pace';
-import type { ActivityWithAuthor, ActivityType } from '@/types';
+} from "@/lib/utils/pace";
+import type { ActivityWithAuthor, ActivityType } from "@/types";
 
 interface ActivityCardProps {
   activity: ActivityWithAuthor;
+  kudosCount?: number;
+  hasKudos?: boolean;
+  commentCount?: number;
 }
 
 const activityTypeIcons: Record<ActivityType, React.ReactNode> = {
   run: (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg
+      className="w-4 h-4"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -31,7 +40,12 @@ const activityTypeIcons: Record<ActivityType, React.ReactNode> = {
     </svg>
   ),
   ride: (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg
+      className="w-4 h-4"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
       <circle cx="5" cy="18" r="3" strokeWidth={2} />
       <circle cx="19" cy="18" r="3" strokeWidth={2} />
       <path
@@ -40,11 +54,21 @@ const activityTypeIcons: Record<ActivityType, React.ReactNode> = {
         strokeWidth={2}
         d="M12 18V9l4-4h3"
       />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 18l3-9" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M9 18l3-9"
+      />
     </svg>
   ),
   swim: (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg
+      className="w-4 h-4"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -62,17 +86,22 @@ const activityTypeIcons: Record<ActivityType, React.ReactNode> = {
 };
 
 const activityTypeLabels: Record<ActivityType, string> = {
-  run: 'Run',
-  ride: 'Ride',
-  swim: 'Swim',
+  run: "Run",
+  ride: "Ride",
+  swim: "Swim",
 };
 
-export function ActivityCard({ activity }: ActivityCardProps) {
+export function ActivityCard({
+  activity,
+  kudosCount = 0,
+  hasKudos = false,
+  commentCount = 0,
+}: ActivityCardProps) {
   const initials = activity.author.displayName
     ? activity.author.displayName
-        .split(' ')
+        .split(" ")
         .map((n) => n[0])
-        .join('')
+        .join("")
         .toUpperCase()
     : activity.author.username.slice(0, 2).toUpperCase();
 
@@ -83,7 +112,10 @@ export function ActivityCard({ activity }: ActivityCardProps) {
           <div className="flex items-center gap-3">
             <Link href={`/athlete/${activity.author.username}`}>
               <Avatar className="h-10 w-10 border-2 border-border">
-                <AvatarImage src={activity.author.avatarUrl} alt={activity.author.username} />
+                <AvatarImage
+                  src={activity.author.avatarUrl}
+                  alt={activity.author.username}
+                />
                 <AvatarFallback className="bg-muted text-sm font-medium">
                   {initials}
                 </AvatarFallback>
@@ -128,22 +160,28 @@ export function ActivityCard({ activity }: ActivityCardProps) {
             <p className="text-2xl font-bold text-gradient">
               {formatDistance(activity.distanceMeters)}
             </p>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">Distance</p>
-          </div>
-          <div className="text-center p-3 rounded-lg bg-muted/50">
-            <p className="text-2xl font-bold">
-              {formatDuration(activity.movingTimeSeconds || activity.elapsedTimeSeconds)}
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">
+              Distance
             </p>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">Time</p>
           </div>
           <div className="text-center p-3 rounded-lg bg-muted/50">
             <p className="text-2xl font-bold">
-              {activity.type === 'run'
-                ? `${formatPace(activity.avgPaceSecondsPerKm)}/km`
-                : `${activity.avgSpeedKmh?.toFixed(1) || '--'} km/h`}
+              {formatDuration(
+                activity.movingTimeSeconds || activity.elapsedTimeSeconds
+              )}
             </p>
             <p className="text-xs text-muted-foreground uppercase tracking-wider">
-              {activity.type === 'run' ? 'Pace' : 'Speed'}
+              Time
+            </p>
+          </div>
+          <div className="text-center p-3 rounded-lg bg-muted/50">
+            <p className="text-2xl font-bold">
+              {activity.type === "run"
+                ? `${formatPace(activity.avgPaceSecondsPerKm)}/km`
+                : `${activity.avgSpeedKmh?.toFixed(1) || "--"} km/h`}
+            </p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">
+              {activity.type === "run" ? "Pace" : "Speed"}
             </p>
           </div>
         </div>
@@ -186,10 +224,32 @@ export function ActivityCard({ activity }: ActivityCardProps) {
         {activity.polyline && (
           <Link href={`/activity/${activity.id}`} className="block">
             <div className="rounded-lg overflow-hidden h-48 bg-muted">
-              <MapThumbnail polyline={activity.polyline} className="h-full w-full" />
+              <MapThumbnail
+                polyline={activity.polyline}
+                className="h-full w-full"
+              />
             </div>
           </Link>
         )}
+
+        <div className="flex items-center gap-4 pt-2 text-sm text-muted-foreground">
+          <KudosButton
+            activityId={activity.id}
+            initialCount={kudosCount}
+            initialHasKudos={hasKudos}
+            variant="compact"
+          />
+          <Link
+            href={`/activity/${activity.id}#comments`}
+            className="hover:text-foreground transition-colors"
+          >
+            {commentCount === 0
+              ? "Comment"
+              : `${commentCount} ${
+                  commentCount === 1 ? "comment" : "comments"
+                }`}
+          </Link>
+        </div>
       </CardContent>
     </Card>
   );

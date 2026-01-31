@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { WeeklyActivity } from '@/types';
+import { useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { WeeklyActivity } from "@/types";
 
 interface ContributionGraphProps {
   data: WeeklyActivity[];
@@ -20,14 +20,17 @@ function getIntensityLevel(count: number, maxCount: number): number {
 }
 
 const intensityColors = [
-  'bg-muted',
-  'bg-electric-blue-200 dark:bg-electric-blue-500/30',
-  'bg-electric-blue-300 dark:bg-electric-blue-500/50',
-  'bg-electric-blue-400 dark:bg-electric-blue-500/70',
-  'bg-electric-blue-500 dark:bg-electric-blue-500',
+  "bg-muted",
+  "bg-electric-blue-200 dark:bg-electric-blue-500/30",
+  "bg-electric-blue-300 dark:bg-electric-blue-500/50",
+  "bg-electric-blue-400 dark:bg-electric-blue-500/70",
+  "bg-electric-blue-500 dark:bg-electric-blue-500",
 ];
 
-export function ContributionGraph({ data, weeks = 52 }: ContributionGraphProps) {
+export function ContributionGraph({
+  data,
+  weeks = 52,
+}: ContributionGraphProps) {
   const { grid, totalActivities, monthLabels } = useMemo(() => {
     const maxCount = Math.max(...data.map((d) => d.count), 1);
     const totalActivities = data.reduce((sum, d) => sum + d.count, 0);
@@ -39,7 +42,7 @@ export function ContributionGraph({ data, weeks = 52 }: ContributionGraphProps) 
       const weekData = lastNWeeks[week];
       grid.push([
         {
-          date: weekData?.date || '',
+          date: weekData?.date || "",
           count: weekData?.count || 0,
           level: getIntensityLevel(weekData?.count || 0, maxCount),
         },
@@ -48,18 +51,18 @@ export function ContributionGraph({ data, weeks = 52 }: ContributionGraphProps) 
 
     const monthLabels: { label: string; position: number }[] = [];
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
     let currentMonth = -1;
 
@@ -89,35 +92,41 @@ export function ContributionGraph({ data, weeks = 52 }: ContributionGraphProps) 
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          <div className="flex text-xs text-muted-foreground mb-1">
-            {monthLabels.map((m, idx) => (
-              <span
-                key={idx}
-                className="absolute"
-                style={{ left: `${(m.position / weeks) * 100}%` }}
-              >
-                {m.label}
-              </span>
-            ))}
-          </div>
-
           <div className="overflow-x-auto pb-2">
-            <div className="flex gap-[3px] min-w-max">
-              {grid.map((week, weekIdx) => (
-                <div key={weekIdx} className="flex flex-col gap-[3px]">
-                  {week.map((day, dayIdx) => (
-                    <div
-                      key={`${weekIdx}-${dayIdx}`}
-                      className={`w-3 h-3 rounded-sm ${intensityColors[day.level]} transition-colors`}
-                      title={
-                        day.date
-                          ? `${day.count} activities - Week of ${new Date(day.date).toLocaleDateString()}`
-                          : 'No data'
-                      }
-                    />
-                  ))}
-                </div>
-              ))}
+            <div className="min-w-max space-y-1">
+              <div className="relative w-full min-h-4 text-xs text-muted-foreground">
+                {monthLabels.map((m, idx) => (
+                  <span
+                    key={idx}
+                    className="absolute"
+                    style={{ left: `${(m.position / weeks) * 100}%` }}
+                  >
+                    {m.label}
+                  </span>
+                ))}
+              </div>
+
+              <div className="flex gap-[3px]">
+                {grid.map((week, weekIdx) => (
+                  <div key={weekIdx} className="flex flex-col gap-[3px]">
+                    {week.map((day, dayIdx) => (
+                      <div
+                        key={`${weekIdx}-${dayIdx}`}
+                        className={`w-3 h-3 rounded-sm ${
+                          intensityColors[day.level]
+                        } transition-colors`}
+                        title={
+                          day.date
+                            ? `${day.count} activities - Week of ${new Date(
+                                day.date
+                              ).toLocaleDateString()}`
+                            : "No data"
+                        }
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 

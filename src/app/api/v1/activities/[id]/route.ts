@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(
   request: NextRequest,
@@ -10,7 +10,7 @@ export async function GET(
     const supabase = await createClient();
 
     const { data, error } = await supabase
-      .from('activities')
+      .from("activities")
       .select(
         `
         *,
@@ -22,11 +22,14 @@ export async function GET(
         )
       `
       )
-      .eq('id', id)
+      .eq("id", id)
       .single();
 
     if (error || !data) {
-      return NextResponse.json({ error: 'Activity not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: "Activity not found" },
+        { status: 404 }
+      );
     }
 
     const profile = data.profiles as Record<string, unknown>;
@@ -59,6 +62,8 @@ export async function GET(
       best1kmSeconds: data.best_1km_seconds,
       best5kmSeconds: data.best_5km_seconds,
       best10kmSeconds: data.best_10km_seconds,
+      relativeEffort:
+        data.relative_effort != null ? Number(data.relative_effort) : null,
       source: data.source,
       createdAt: data.created_at,
       updatedAt: data.updated_at,
@@ -72,8 +77,11 @@ export async function GET(
 
     return NextResponse.json(activity);
   } catch (error) {
-    console.error('API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("API error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -85,7 +93,7 @@ export async function DELETE(
     const { id } = await params;
     const supabase = await createClient();
 
-    const { error } = await supabase.from('activities').delete().eq('id', id);
+    const { error } = await supabase.from("activities").delete().eq("id", id);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -93,7 +101,10 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("API error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

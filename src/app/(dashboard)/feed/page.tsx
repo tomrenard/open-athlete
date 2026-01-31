@@ -1,16 +1,41 @@
-import { Suspense } from 'react';
-import Link from 'next/link';
-import { InfiniteFeed } from '@/components/feed/InfiniteFeed';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { getFeedActivities } from '@/actions/activity.actions';
-import { getCurrentProfile } from '@/actions/auth.actions';
+import { Suspense } from "react";
+import { InfiniteFeed } from "@/components/feed/InfiniteFeed";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getFeedActivities } from "@/actions/activity.actions";
+import { getCurrentProfile, getCurrentUser } from "@/actions/auth.actions";
+import {
+  getKudosCounts,
+  getActivityIdsUserHasKudos,
+} from "@/actions/kudos.actions";
+import { getCommentCounts } from "@/actions/comments.actions";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 async function FeedContent() {
-  const { activities } = await getFeedActivities(1, 10);
-  return <InfiniteFeed initialActivities={activities} />;
+  const [currentUser, { activities }] = await Promise.all([
+    getCurrentUser(),
+    getFeedActivities(1, 10),
+  ]);
+  const activityIds = activities.map((a) => a.id);
+  const [kudosCounts, hasKudosIds, commentCounts] = await Promise.all([
+    getKudosCounts(activityIds),
+    currentUser
+      ? getActivityIdsUserHasKudos(activityIds, currentUser.id)
+      : Promise.resolve(new Set<string>()),
+    getCommentCounts(activityIds),
+  ]);
+  const activitiesWithKudos = activities.map((a) => ({
+    ...a,
+    kudosCount: kudosCounts[a.id] ?? 0,
+    hasKudos: hasKudosIds.has(a.id),
+    commentCount: commentCounts[a.id] ?? 0,
+  }));
+  return (
+    <InfiniteFeed
+      initialActivities={activitiesWithKudos}
+      currentUserId={currentUser?.id}
+    />
+  );
 }
 
 function FeedSkeleton() {
@@ -42,80 +67,21 @@ export default async function FeedPage() {
   const profile = await getCurrentProfile();
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 glass border-b border-border">
-        <div className="container max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/feed" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg gradient-electric flex items-center justify-center">
-              <svg
-                className="w-5 h-5 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
-            </div>
-            <span className="font-bold text-lg">OpenAthlete</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <Link href="/upload">
-              <Button size="sm" className="glass-button">
-                <svg
-                  className="w-4 h-4 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-                Upload
-              </Button>
-            </Link>
-            <Link href="/dashboard">
-              <Button variant="ghost" size="sm" className="btn-touch">
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                  />
-                </svg>
-              </Button>
-            </Link>
-          </div>
+    <div className="max-w-2xl mx-auto space-y-6">
+      {profile && (
+        <div className="glass-card rounded-xl p-4">
+          <p className="text-sm text-muted-foreground">
+            Welcome back,{" "}
+            <span className="font-medium text-foreground">
+              {profile.display_name || profile.username}
+            </span>
+          </p>
         </div>
-      </header>
+      )}
 
-      <main className="container max-w-2xl mx-auto px-4 py-6">
-        {profile && (
-          <div className="glass-card rounded-xl p-4 mb-6">
-            <p className="text-sm text-muted-foreground">
-              Welcome back, <span className="font-medium text-foreground">{profile.display_name || profile.username}</span>
-            </p>
-          </div>
-        )}
-
-        <Suspense fallback={<FeedSkeleton />}>
-          <FeedContent />
-        </Suspense>
-      </main>
+      <Suspense fallback={<FeedSkeleton />}>
+        <FeedContent />
+      </Suspense>
     </div>
   );
 }

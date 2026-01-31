@@ -1,18 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
 
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '10', 10);
-    const userId = searchParams.get('user_id');
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const userId = searchParams.get("user_id");
     const offset = (page - 1) * limit;
 
     let query = supabase
-      .from('activities')
+      .from("activities")
       .select(
         `
         *,
@@ -24,11 +24,11 @@ export async function GET(request: NextRequest) {
         )
       `
       )
-      .order('started_at', { ascending: false })
+      .order("started_at", { ascending: false })
       .range(offset, offset + limit);
 
     if (userId) {
-      query = query.eq('user_id', userId);
+      query = query.eq("user_id", userId);
     }
 
     const { data, error } = await query;
@@ -65,6 +65,8 @@ export async function GET(request: NextRequest) {
       best1kmSeconds: row.best_1km_seconds,
       best5kmSeconds: row.best_5km_seconds,
       best10kmSeconds: row.best_10km_seconds,
+      relativeEffort:
+        row.relative_effort != null ? Number(row.relative_effort) : null,
       source: row.source,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
@@ -85,7 +87,10 @@ export async function GET(request: NextRequest) {
       hasMore: data.length > limit,
     });
   } catch (error) {
-    console.error('API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("API error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

@@ -1,17 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
 
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
     const offset = (page - 1) * limit;
 
     const { data, error } = await supabase
-      .from('activities')
+      .from("activities")
       .select(
         `
         *,
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         )
       `
       )
-      .order('started_at', { ascending: false })
+      .order("started_at", { ascending: false })
       .range(offset, offset + limit);
 
     if (error) {
@@ -46,6 +46,8 @@ export async function GET(request: NextRequest) {
         : null,
       avgHeartRate: row.avg_heart_rate,
       maxHeartRate: row.max_heart_rate,
+      relativeEffort:
+        row.relative_effort != null ? Number(row.relative_effort) : null,
       avgPaceSecondsPerKm: row.avg_pace_seconds_per_km
         ? Number(row.avg_pace_seconds_per_km)
         : null,
@@ -69,7 +71,10 @@ export async function GET(request: NextRequest) {
       hasMore: data.length > limit,
     });
   } catch (error) {
-    console.error('API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("API error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
