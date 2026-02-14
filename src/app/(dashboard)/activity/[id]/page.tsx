@@ -178,7 +178,7 @@ export default async function ActivityPage({ params }: ActivityPageProps) {
               <Separator className="my-6" />
               <div>
                 <h3 className="font-semibold mb-4">Best Efforts</h3>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {activity.best1kmSeconds && (
                     <StatCard
                       label="1 km"

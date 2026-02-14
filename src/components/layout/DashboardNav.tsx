@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -17,6 +18,7 @@ import {
   Target,
   Route,
   Sparkles,
+  Menu,
 } from "lucide-react";
 import { signOut } from "@/actions/auth.actions";
 import { Button } from "@/components/ui/button";
@@ -27,6 +29,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 export interface DashboardNavProps {
@@ -67,10 +76,25 @@ export function DashboardNav({
   unreadCount,
 }: DashboardNavProps) {
   const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-14 max-w-6xl items-center gap-6 px-4">
+      <div className="container mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 md:gap-6">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden text-muted-foreground hover:text-foreground btn-touch"
+          onClick={() => setMobileOpen(true)}
+          aria-label="Open menu"
+        >
+          <Menu className="size-5" />
+        </Button>
+
         <Link
           href="/dashboard"
           className="flex items-center gap-2 text-foreground hover:opacity-90"
@@ -78,10 +102,10 @@ export function DashboardNav({
           <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <LayoutDashboard className="size-4" />
           </div>
-          <span className="font-semibold">OpenAthlete</span>
+          <span className="font-semibold hidden sm:inline">OpenAthlete</span>
         </Link>
 
-        <nav className="flex items-center gap-1">
+        <nav className="hidden md:flex items-center gap-1">
           {primaryLinks.map(({ href, label, icon }) => (
             <Link key={href} href={href}>
               <Button
@@ -93,7 +117,7 @@ export function DashboardNav({
                 )}
               >
                 {icon}
-                <span className="ml-2 hidden sm:inline">{label}</span>
+                <span className="ml-2">{label}</span>
               </Button>
             </Link>
           ))}
@@ -136,7 +160,7 @@ export function DashboardNav({
               )}
             </Button>
           </Link>
-          <Link href="/settings">
+          <Link href="/settings" className="hidden md:inline-flex">
             <Button
               variant="ghost"
               size="icon"
@@ -177,6 +201,7 @@ export function DashboardNav({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
+                  className="hidden md:flex"
                   variant="destructive"
                   onSelect={(e) => {
                     e.preventDefault();
@@ -195,6 +220,88 @@ export function DashboardNav({
           )}
         </div>
       </div>
+
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetContent side="left" className="w-72 p-0">
+          <SheetHeader className="border-b border-border px-4 py-4">
+            <SheetTitle className="flex items-center gap-2">
+              <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <LayoutDashboard className="size-4" />
+              </div>
+              OpenAthlete
+            </SheetTitle>
+          </SheetHeader>
+
+          <nav className="flex-1 overflow-y-auto px-2 py-4">
+            <div className="space-y-1">
+              {primaryLinks.map(({ href, label, icon }) => (
+                <Link key={href} href={href}>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start gap-3 text-muted-foreground hover:text-foreground btn-touch",
+                      pathname === href &&
+                        "bg-accent text-foreground"
+                    )}
+                  >
+                    {icon}
+                    {label}
+                  </Button>
+                </Link>
+              ))}
+            </div>
+
+            <div className="my-4 h-px bg-border" />
+
+            <div className="space-y-1">
+              {moreLinks.map(({ href, label, icon }) => (
+                <Link key={href} href={href}>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start gap-3 text-muted-foreground hover:text-foreground btn-touch",
+                      pathname === href &&
+                        "bg-accent text-foreground"
+                    )}
+                  >
+                    {icon}
+                    {label}
+                  </Button>
+                </Link>
+              ))}
+            </div>
+
+            <div className="my-4 h-px bg-border" />
+
+            <Link href="/settings">
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start gap-3 text-muted-foreground hover:text-foreground btn-touch",
+                  pathname === "/settings" &&
+                    "bg-accent text-foreground"
+                )}
+              >
+                <Settings className="size-4" />
+                Settings
+              </Button>
+            </Link>
+          </nav>
+
+          {user && profile && (
+            <SheetFooter className="border-t border-border px-2 py-4">
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10 btn-touch"
+                onClick={() => signOut()}
+              >
+                <LogOut className="size-4" />
+                Sign out
+              </Button>
+            </SheetFooter>
+          )}
+        </SheetContent>
+      </Sheet>
     </header>
   );
 }

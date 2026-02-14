@@ -179,7 +179,7 @@ export default function UploadPage() {
             <TabsContent value="upload">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div
-                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+                  className={`border-2 border-dashed rounded-xl p-4 sm:p-8 text-center transition-colors ${
                     dragActive
                       ? "border-primary bg-primary/5"
                       : "border-border hover:border-primary/50"
@@ -296,10 +296,10 @@ export default function UploadPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Activity Type</Label>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         {(["run", "ride", "swim"] as ActivityType[]).map(
                           (type) => (
                             <Button
@@ -321,7 +321,7 @@ export default function UploadPage() {
 
                     <div className="space-y-2">
                       <Label>Privacy</Label>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         {(
                           ["public", "followers", "private"] as PrivacyLevel[]
                         ).map((p) => (
@@ -402,10 +402,10 @@ export default function UploadPage() {
                     className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Type</Label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       {(["run", "ride", "swim"] as ActivityType[]).map((t) => (
                         <Button
                           key={t}
@@ -422,7 +422,7 @@ export default function UploadPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Privacy</Label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       {(
                         ["public", "followers", "private"] as PrivacyLevel[]
                       ).map((p) => (
@@ -449,7 +449,7 @@ export default function UploadPage() {
                     onChange={(e) => setManualDate(e.target.value)}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="manual-duration">Duration (minutes)</Label>
                     <Input

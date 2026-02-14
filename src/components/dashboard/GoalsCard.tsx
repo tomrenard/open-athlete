@@ -138,7 +138,7 @@ export function GoalsCard({ initialGoals }: GoalsCardProps) {
             onSubmit={handleSubmit}
             className="space-y-3 p-4 rounded-lg bg-muted/30"
           >
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label htmlFor="goal-type">Type</Label>
                 <select
@@ -206,8 +206,8 @@ export function GoalsCard({ initialGoals }: GoalsCardProps) {
                   key={goal.id}
                   className="flex flex-col gap-1 p-3 rounded-lg bg-muted/30"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-medium min-w-0 truncate">
                       {goalTypeLabels[goal.type]} ·{" "}
                       {goalPeriodLabels[goal.period]} ·{" "}
                       {formatPeriodStart(goal.period, goal.periodStart)}

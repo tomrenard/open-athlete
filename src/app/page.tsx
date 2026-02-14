@@ -41,11 +41,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </div>
           <span className="font-bold text-xl text-white">OpenAthlete</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Link href="/login">
             <Button
               variant="ghost"
-              className="text-white hover:bg-white/10 btn-touch"
+              className="text-white hover:bg-white/10 btn-touch hidden sm:inline-flex"
             >
               Sign in
             </Button>
@@ -91,7 +91,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 </Link>
               </div>
 
-              <div className="flex items-center gap-8 pt-4">
+              <div className="flex items-center gap-4 sm:gap-8 pt-4">
                 <div>
                   <p className="text-3xl font-bold text-white">All</p>
                   <p className="text-sm text-slate-400">Features Free</p>
